@@ -1,0 +1,7 @@
+azure-mgmt-apimanagement==3.0.0
+azure-identity==1.13.0
+azure-search-documents==11.4.0
+PyYAML==6.0.2
+markitdown==0.1.1
+python-dotenv==1.1.0
+openapi-spec-validator==0.5.1
