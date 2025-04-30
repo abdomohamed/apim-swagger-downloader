@@ -6,6 +6,7 @@ from azure.identity import DefaultAzureCredential, ClientSecretCredential
 from azure.mgmt.apimanagement import ApiManagementClient
 from azure.mgmt.apimanagement.models import ExportApi, ExportFormat
 from src.config import Config
+import requests
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -86,15 +87,22 @@ class APIMSwaggerDownloader:
             resource_group_name=self.apim_settings['resource_group'],
             service_name=self.apim_settings['service_name'],
             api_id=api_id,
-            format="OpenAPI",
+            format=ExportFormat.SWAGGER,
             export=ExportApi.TRUE
         )
         
+        
+        
+        print(f"Export result: {export_result.additional_properties}")
+        
         # Convert response content to dictionary
-        if hasattr(export_result, 'as_dict'):
-            swagger_content = export_result.as_dict()
+        if hasattr(export_result, 'additional_properties'):
+            swagger_link = export_result.additional_properties['properties']['value']['link']
+            response = requests.get(swagger_link)
+            response.raise_for_status()
+            swagger_content = response.json()
         else:
-            swagger_content = json.loads(export_result.value.decode('utf-8'))
+            raise ValueError("Failed to retrieve swagger content from export result")
         
         # Create clean filename
         safe_name = ''.join(c if c.isalnum() or c in ['-', '_'] else '_' for c in api_name)
