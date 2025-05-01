@@ -97,6 +97,7 @@ azure:
 
 
 You can limit the APIs that are processed using the following configuration options:
+
 ```yaml
 azure:
   # API filter settings
@@ -118,6 +119,7 @@ This gives you the flexibility to limit the scope of APIs being processed while 
 4. If both filters are specified, it will include APIs that match either condition
 
 This gives you the flexibility to limit the scope of APIs being processed while maintaining the original behavior when no filters are specified.
+```
 
 ### Authentication Options
 
