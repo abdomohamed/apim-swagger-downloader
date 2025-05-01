@@ -41,13 +41,13 @@ class AzureSearchIndexer:
         key = self.search_settings['key']
         index_name = self.search_settings['index_name']
         
-        # Create Azure credential based on configuration
-        if self.config.should_use_default_credential():
-            logger.info("Using DefaultAzureCredential (current logged-in user via Azure CLI)")
-            credential = DefaultAzureCredential()
-        else:
-            logger.info("Using ClientSecretCredential with provided service principal")
-            credential = AzureKeyCredential(key)
+        # # Create Azure credential based on configuration
+        # if self.config.should_use_default_credential():
+        #     logger.info("Using DefaultAzureCredential (current logged-in user via Azure CLI)")
+        #     credential = DefaultAzureCredential()
+        # else:
+        logger.info("Using AzureKeyCredential with provided service principal")
+        credential = AzureKeyCredential(key)
         
         # For managing indexes
         self.index_client = SearchIndexClient(

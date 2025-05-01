@@ -54,18 +54,51 @@ class APIMSwaggerDownloader:
     
     def get_all_apis(self):
         """
-        Get all APIs from the APIM instance
+        Get APIs from the APIM instance based on configuration filters
         
         Returns:
             list: List of API objects
         """
         logger.info(f"Retrieving APIs from service: {self.apim_settings['service_name']}")
-        apis = list(self.apim_client.api.list_by_service(
+        
+        # Get API filter settings
+        api_filter = self.apim_settings.get('api_filter', {})
+        include_apis = api_filter.get('include_apis', [])
+        include_tags = api_filter.get('include_tags', [])
+        
+        # Get all APIs first
+        all_apis = list(self.apim_client.api.list_by_service(
             resource_group_name=self.apim_settings['resource_group'],
             service_name=self.apim_settings['service_name']
         ))
-        logger.info(f"Found {len(apis)} APIs")
-        return apis
+        
+        # No filters specified, return all APIs
+        if not include_apis and not include_tags:
+            logger.info(f"No API filters configured. Found {len(all_apis)} APIs")
+            return all_apis
+        
+        # Filter APIs based on configuration
+        filtered_apis = []
+        
+        for api in all_apis:
+            # Include specific API IDs
+            if include_apis and api.name.lower() in include_apis:
+                filtered_apis.append(api)
+                continue
+                
+            # Include APIs with specific tags
+            if include_tags and hasattr(api, 'tags'):
+                api_tags = api.tags or []
+                if isinstance(api_tags, str):
+                    api_tags = [t.strip() for t in api_tags.split(',')]
+                
+                # Check if any of the API's tags match the filter tags
+                if any(tag in api_tags for tag in include_tags):
+                    filtered_apis.append(api)
+                    continue
+        
+        logger.info(f"Applied API filters. Found {len(filtered_apis)} APIs from {len(all_apis)} total APIs")
+        return filtered_apis
     
     def download_swagger(self, api):
         """

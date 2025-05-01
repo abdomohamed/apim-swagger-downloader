@@ -60,6 +60,19 @@ class Config:
             self.config['azure']['search']['key'] = os.getenv('AZURE_SEARCH_KEY')
         if os.getenv('AZURE_SEARCH_INDEX_NAME'):
             self.config['azure']['search']['index_name'] = os.getenv('AZURE_SEARCH_INDEX_NAME')
+            
+          # API filter settings
+        if os.getenv('AZURE_APIM_INCLUDE_APIS'):
+            if 'api_filter' not in self.config['azure']:
+                self.config['azure']['api_filter'] = {}
+            include_apis = os.getenv('AZURE_APIM_INCLUDE_APIS').split(',')
+            self.config['azure']['api_filter']['include_apis'] = [api.strip() for api in include_apis]
+    
+        if os.getenv('AZURE_APIM_INCLUDE_TAGS'):
+            if 'api_filter' not in self.config['azure']:
+                self.config['azure']['api_filter'] = {}
+            include_tags = os.getenv('AZURE_APIM_INCLUDE_TAGS').split(',')
+            self.config['azure']['api_filter']['include_tags'] = [tag.strip() for tag in include_tags]
     
     def should_use_default_credential(self):
         """Check if DefaultAzureCredential should be used"""
@@ -79,11 +92,19 @@ class Config:
     
     def get_apim_settings(self):
         """Get APIM-related settings"""
-        return {
+        settings = {
             'subscription_id': self.config['azure']['subscription_id'],
             'resource_group': self.config['azure']['resource_group'],
             'service_name': self.config['azure']['service_name']
         }
+        
+        # Add API filter settings if they exist
+        if 'api_filter' in self.config['azure']:
+            settings['api_filter'] = self.config['azure']['api_filter']
+        else:
+            settings['api_filter'] = {'include_apis': [], 'include_tags': []}
+        
+        return settings
     
     def get_search_settings(self):
         """Get Azure Search settings"""

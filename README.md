@@ -84,6 +84,41 @@ processing:
   upload_to_search: true
 ```
 
+### API Filtering
+
+You can limit the APIs that are processed using the following configuration options:
+
+```yaml
+azure:
+  # API filter settings
+  api_filter:
+    include_apis: ["api1", "api2"]  # Process only these specific API IDs
+    include_tags: ["public", "v1"]  # Process only APIs with these tags
+
+
+You can limit the APIs that are processed using the following configuration options:
+```yaml
+azure:
+  # API filter settings
+  api_filter:
+    include_apis: ["api1", "api2"]  # Process only these specific API IDs
+    include_tags: ["public", "v1"]  # Process only APIs with these tags
+
+
+With these changes, the APIM swagger downloader will:
+1. By default, continue to enumerate all APIs in the APIM instance
+2. If `include_apis` is specified, only process the listed APIs
+3. If `include_tags` is specified, only process APIs that have at least one of the specified tags
+4. If both filters are specified, it will include APIs that match either condition
+
+This gives you the flexibility to limit the scope of APIs being processed while maintaining the original behavior when no filters are specified.With these changes, the APIM swagger downloader will:
+1. By default, continue to enumerate all APIs in the APIM instance
+2. If `include_apis` is specified, only process the listed APIs
+3. If `include_tags` is specified, only process APIs that have at least one of the specified tags
+4. If both filters are specified, it will include APIs that match either condition
+
+This gives you the flexibility to limit the scope of APIs being processed while maintaining the original behavior when no filters are specified.
+
 ### Authentication Options
 
 The tool supports two authentication methods:
