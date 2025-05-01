@@ -47,23 +47,19 @@ class AzureSearchIndexer:
             credential = DefaultAzureCredential()
         else:
             logger.info("Using ClientSecretCredential with provided service principal")
-            credential = ClientSecretCredential(
-                tenant_id=self.creds['tenant_id'],
-                client_id=self.creds['client_id'],
-                client_secret=self.creds['client_secret']
-            )
+            credential = AzureKeyCredential(key)
         
         # For managing indexes
         self.index_client = SearchIndexClient(
             endpoint=endpoint,
-            credential=AzureKeyCredential(key)
+            credential= credential
         )
         
         # For uploading documents
         self.search_client = SearchClient(
             endpoint=endpoint,
             index_name=index_name,
-            credential=AzureKeyCredential(key)
+            credential= credential
         )
     
     def create_search_index(self):
