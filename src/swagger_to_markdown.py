@@ -44,38 +44,38 @@ class SwaggerToMarkdownConverter:
         logger.info(f"Converting {file_basename} to Markdown using Markitdown")
         
         try:
-            # Use Markitdown to convert the swagger file
-            result = self.markitdown.convert(swagger_file_path)
-            markdown_content = result.text_content
+            # # Use Markitdown to convert the swagger file
+            # result = self.markitdown.convert(swagger_file_path)
+            # markdown_content = result.text_content
             
-            # Extract API info for additional metadata
-            with open(swagger_file_path, 'r') as f:
-                swagger_data = json.load(f)
+            # # Extract API info for additional metadata
+            # with open(swagger_file_path, 'r') as f:
+            #     swagger_data = json.load(f)
             
-            # Extract API info
-            info = swagger_data.get('info', {})
-            api_title = info.get('title', 'API Documentation')
-            api_version = info.get('version', '')
-            api_description = info.get('description', '')
+            # # Extract API info
+            # info = swagger_data.get('info', {})
+            # api_title = info.get('title', 'API Documentation')
+            # api_version = info.get('version', '')
+            # api_description = info.get('description', '')
             
-            # Add custom header with additional metadata
-            header = f"# {api_title}\n\n"
-            if api_version:
-                header += f"**Version**: {api_version}\n\n"
-            if api_description:
-                header += f"{api_description}\n\n"
+            # # Add custom header with additional metadata
+            # header = f"# {api_title}\n\n"
+            # if api_version:
+            #     header += f"**Version**: {api_version}\n\n"
+            # if api_description:
+            #     header += f"{api_description}\n\n"
                 
-            # Add download timestamp if available
-            if 'x-downloaded-timestamp' in info:
-                header += f"*Last updated: {info['x-downloaded-timestamp']}*\n\n"
+            # # Add download timestamp if available
+            # if 'x-downloaded-timestamp' in info:
+            #     header += f"*Last updated: {info['x-downloaded-timestamp']}*\n\n"
             
-            # Combine header with the generated markdown
-            enhanced_markdown = header + markdown_content
-                
+            # # Combine header with the generated markdown
+            # enhanced_markdown = header + markdown_content
+            enhanced_markdown = self._python_based_conversion(swagger_file_path)
         except Exception as e:
             logger.error(f"Error converting with Markitdown: {str(e)}")
             logger.info("Falling back to basic Python-based conversion")
-            enhanced_markdown = self._python_based_conversion(swagger_file_path)
+            
         
         # Save the enhanced markdown
         with open(markdown_file, 'w') as f:
@@ -101,101 +101,197 @@ class SwaggerToMarkdownConverter:
         # Create basic markdown content
         markdown = []
         
-        # Add API information
-        info = swagger.get('info', {})
-        title = info.get('title', 'API Documentation')
-        version = info.get('version', '')
-        description = info.get('description', '')
+        # Title
+        title = swagger.get('info', {}).get('title', 'API Documentation')
+        markdown.append(f"# {title}")
+        markdown.append("")
         
-        markdown.append(f"# {title}\n")
-        if version:
-            markdown.append(f"**Version:** {version}\n")
+        # Description
+        description = swagger.get('info', {}).get('description', '')
         if description:
-            markdown.append(f"{description}\n")
+            markdown.append(description)
+            markdown.append("")
         
-        # Add base URL information
-        if 'servers' in swagger and swagger['servers']:
-            markdown.append("## Servers\n")
-            for server in swagger['servers']:
-                url = server.get('url', '')
-                description = server.get('description', '')
-                markdown.append(f"* {url} - {description}\n")
+        # Add version information
+        version = swagger.get('info', {}).get('version', '')
+        if version:
+            markdown.append(f"**Version:** {version}")
+            markdown.append("")
         
-        # Add paths (endpoints)
-        if 'paths' in swagger:
-            markdown.append("## Endpoints\n")
-            
-            for path, path_item in swagger['paths'].items():
-                markdown.append(f"### {path}\n")
+        # Base URL
+        servers = swagger.get('servers', [])
+        if servers:
+            markdown.append("## Base URL")
+            for server in servers:
+                markdown.append(f"* {server.get('url', '')}")
+                if server.get('description'):
+                    markdown.append(f"  * {server.get('description')}")
+            markdown.append("")
+        
+        # Authentication
+        security_schemes = swagger.get('components', {}).get('securitySchemes', {})
+        if security_schemes:
+            markdown.append("## Authentication")
+            for name, scheme in security_schemes.items():
+                markdown.append(f"### {name}")
+                markdown.append(f"**Type:** {scheme.get('type', '')}")
                 
-                for method, operation in path_item.items():
-                    if method in ['get', 'post', 'put', 'delete', 'patch']:
-                        summary = operation.get('summary', '')
-                        op_description = operation.get('description', '')
+                if scheme.get('description'):
+                    markdown.append(f"\n{scheme.get('description')}")
+                    
+                if scheme.get('type') == 'http':
+                    markdown.append(f"**Scheme:** {scheme.get('scheme', '')}")
+                    
+                if scheme.get('bearerFormat'):
+                    markdown.append(f"**Bearer Format:** {scheme.get('bearerFormat', '')}")
+                    
+                markdown.append("")
+        
+        # Endpoints by tag
+        tags = {}
+        
+        # Group operations by tags
+        for path, path_item in swagger.get('paths', {}).items():
+            for method, operation in path_item.items():
+                if method in ['get', 'post', 'put', 'delete', 'patch']:
+                    operation_tags = operation.get('tags', ['default'])
+                    for tag in operation_tags:
+                        if tag not in tags:
+                            tags[tag] = []
+                        tags[tag].append((path, method, operation))
+        
+        # Generate markdown for each tag
+        for tag_name, operations in tags.items():
+            markdown.append(f"## {tag_name}")
+            
+            # Find tag description if available
+            tag_description = ""
+            for tag in swagger.get('tags', []):
+                if tag.get('name') == tag_name and tag.get('description'):
+                    tag_description = tag.get('description')
+                    break
+            
+            if tag_description:
+                markdown.append(f"{tag_description}")
+                markdown.append("")
+            
+            # Generate documentation for each endpoint
+            for path, method, operation in operations:
+                operation_id = operation.get('operationId', f"{method} {path}")
+                summary = operation.get('summary', operation_id)
+                
+                markdown.append(f"### {summary}")
+                markdown.append("")
+                
+                if operation.get('description'):
+                    markdown.append(operation.get('description'))
+                    markdown.append("")
+                
+                # Endpoint information
+                markdown.append("```")
+                markdown.append(f"{method.upper()} {path}")
+                markdown.append("```")
+                markdown.append("")
+                
+                # Parameters
+                parameters = operation.get('parameters', [])
+                if parameters:
+                    markdown.append("#### Parameters")
+                    markdown.append("")
+                    markdown.append("| Name | In | Type | Required | Description |")
+                    markdown.append("|------|----|----|----------|-------------|")
+                    
+                    for param in parameters:
+                        name = param.get('name', '')
+                        param_in = param.get('in', '')
+                        required = "Yes" if param.get('required', False) else "No"
                         
-                        markdown.append(f"#### {method.upper()}\n")
-                        if summary:
-                            markdown.append(f"**Summary:** {summary}\n")
-                        if op_description:
-                            markdown.append(f"{op_description}\n")
+                        # Get the type
+                        param_type = "object"
+                        if 'schema' in param:
+                            param_type = param['schema'].get('type', 'object')
+                            if param_type == 'array' and 'items' in param['schema']:
+                                items_type = param['schema']['items'].get('type', 'object')
+                                param_type = f"array of {items_type}"
                         
-                        # Add request parameters
-                        if 'parameters' in operation and operation['parameters']:
-                            markdown.append("**Parameters:**\n")
-                            for param in operation['parameters']:
-                                param_name = param.get('name', '')
-                                param_in = param.get('in', '')
-                                required = 'Required' if param.get('required', False) else 'Optional'
-                                param_description = param.get('description', '')
-                                
-                                markdown.append(f"* `{param_name}` ({param_in}, {required}) - {param_description}\n")
+                        description = param.get('description', '').replace('\n', '<br>')
                         
-                        # Add request body
-                        if 'requestBody' in operation:
-                            markdown.append("**Request Body:**\n")
-                            content = operation['requestBody'].get('content', {})
-                            for content_type, content_schema in content.items():
-                                markdown.append(f"Content Type: `{content_type}`\n")
+                        markdown.append(f"| {name} | {param_in} | {param_type} | {required} | {description} |")
+                    
+                    markdown.append("")
+                
+                # Request Body
+                if 'requestBody' in operation:
+                    markdown.append("#### Request Body")
+                    markdown.append("")
+                    
+                    request_body = operation['requestBody']
+                    if request_body.get('description'):
+                        markdown.append(request_body.get('description'))
+                        markdown.append("")
+                    
+                    content = request_body.get('content', {})
+                    for content_type, content_schema in content.items():
+                        markdown.append(f"**Content Type:** `{content_type}`")
+                        markdown.append("")
+                        
+                        schema = content_schema.get('schema', {})
+                        if '$ref' in schema:
+                            ref_name = schema['$ref'].split('/')[-1]
+                            markdown.append(f"Schema: {ref_name}")
+                            
+                            # Try to find the schema definition
+                            component_schema = swagger.get('components', {}).get('schemas', {}).get(ref_name, {})
+                            if component_schema:
                                 # Add example if available
                                 if 'example' in content_schema:
-                                    markdown.append("Example:\n```json\n")
+                                    markdown.append("**Example:**")
+                                    markdown.append("```json")
                                     markdown.append(json.dumps(content_schema['example'], indent=2))
-                                    markdown.append("\n```\n")
+                                    markdown.append("```")
+                                elif 'example' in component_schema:
+                                    markdown.append("**Example:**")
+                                    markdown.append("```json")
+                                    markdown.append(json.dumps(component_schema['example'], indent=2))
+                                    markdown.append("```")
                         
-                        # Add responses
-                        if 'responses' in operation:
-                            markdown.append("**Responses:**\n")
-                            for status_code, response in operation['responses'].items():
-                                response_description = response.get('description', '')
-                                markdown.append(f"* `{status_code}` - {response_description}\n")
-                                
-                                # Add example response if available
-                                content = response.get('content', {})
-                                for content_type, content_schema in content.items():
-                                    if 'example' in content_schema:
-                                        markdown.append(f"  Example ({content_type}):\n  ```json\n")
-                                        markdown.append(json.dumps(content_schema['example'], indent=2))
-                                        markdown.append("\n  ```\n")
+                        # Add example if available at content level
+                        elif 'example' in content_schema:
+                            markdown.append("**Example:**")
+                            markdown.append("```json")
+                            markdown.append(json.dumps(content_schema['example'], indent=2))
+                            markdown.append("```")
+                    
+                    markdown.append("")
                 
-                markdown.append("\n")
-        
-        # Add components/schemas (data models)
-        if 'components' in swagger and 'schemas' in swagger['components']:
-            markdown.append("## Models\n")
-            
-            for schema_name, schema in swagger['components']['schemas'].items():
-                markdown.append(f"### {schema_name}\n")
+                # Responses
+                markdown.append("#### Responses")
+                markdown.append("")
                 
-                schema_type = schema.get('type', '')
-                if schema_type:
-                    markdown.append(f"**Type:** {schema_type}\n")
-                
-                if 'properties' in schema:
-                    markdown.append("**Properties:**\n")
-                    for prop_name, prop in schema['properties'].items():
-                        prop_type = prop.get('type', 'object')
-                        prop_description = prop.get('description', '')
-                        markdown.append(f"* `{prop_name}` ({prop_type}) - {prop_description}\n")
+                responses = operation.get('responses', {})
+                for status_code, response in responses.items():
+                    markdown.append(f"**Status Code:** {status_code}")
+                    
+                    if response.get('description'):
+                        markdown.append(f"**Description:** {response.get('description')}")
+                    
+                    content = response.get('content', {})
+                    for content_type, content_schema in content.items():
+                        markdown.append(f"**Content Type:** `{content_type}`")
+                        
+                        schema = content_schema.get('schema', {})
+                        if '$ref' in schema:
+                            ref_name = schema['$ref'].split('/')[-1]
+                            markdown.append(f"Schema: {ref_name}")
+                            
+                            # Add example if available
+                            if 'example' in content_schema:
+                                markdown.append("**Example:**")
+                                markdown.append("```json")
+                                markdown.append(json.dumps(content_schema['example'], indent=2))
+                                markdown.append("```")
+                    
+                    markdown.append("")
         
         return "\n".join(markdown)
     

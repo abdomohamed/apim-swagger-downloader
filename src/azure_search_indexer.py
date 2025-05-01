@@ -4,6 +4,7 @@ import logging
 import hashlib
 from datetime import datetime
 from azure.identity import DefaultAzureCredential, ClientSecretCredential
+from azure.core.credentials import AzureKeyCredential
 from azure.search.documents import SearchClient
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import (
@@ -55,16 +56,14 @@ class AzureSearchIndexer:
         # For managing indexes
         self.index_client = SearchIndexClient(
             endpoint=endpoint,
-            credential=credential,
-            api_key=key
+            credential=AzureKeyCredential(key)
         )
         
         # For uploading documents
         self.search_client = SearchClient(
             endpoint=endpoint,
             index_name=index_name,
-            credential=credential,
-            api_key=key
+            credential=AzureKeyCredential(key)
         )
     
     def create_search_index(self):
@@ -137,6 +136,10 @@ class AzureSearchIndexer:
         timestamp_match = re.search(r'\*Last updated: ([^*]+)\*', content)
         last_updated = timestamp_match.group(1) if timestamp_match else datetime.now().isoformat()
         
+        # Regular expression to match ISO 8601 datetime format
+        iso_datetime_match = re.search(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3}+)?', last_updated)
+        iso_datetime = iso_datetime_match.group(0) + 'Z' if iso_datetime_match else None
+        
         # Create a unique ID based on the file content
         file_id = hashlib.md5(content.encode()).hexdigest()
         
@@ -147,7 +150,7 @@ class AzureSearchIndexer:
             "apiName": title,
             "apiVersion": version,
             "documentType": "API Documentation",
-            "lastUpdated": last_updated,
+            "lastUpdated": iso_datetime,
             "fileName": os.path.basename(markdown_file_path),
             "fileUrl": f"/{os.path.relpath(markdown_file_path)}"
         }

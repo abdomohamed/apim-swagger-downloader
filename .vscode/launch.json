@@ -13,6 +13,16 @@
             "args": [
                 "--download-only",
             ],
+        },
+        {
+            "name": "Python Debugger: Index Only",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--index-only",
+            ],
         }
     ]
 }
