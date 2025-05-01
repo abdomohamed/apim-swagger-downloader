@@ -119,6 +119,7 @@ This gives you the flexibility to limit the scope of APIs being processed while 
 4. If both filters are specified, it will include APIs that match either condition
 
 This gives you the flexibility to limit the scope of APIs being processed while maintaining the original behavior when no filters are specified.
+
 ```
 
 ### Authentication Options
@@ -138,7 +139,7 @@ The tool supports two authentication methods:
 
 You can also use environment variables to override settings in the config file:
 
-```
+```text
 # Azure Authentication
 AZURE_USE_DEFAULT_CREDENTIAL=true  # Set to "true" to use Azure CLI login, "false" to use service principal
 AZURE_TENANT_ID=your-tenant-id     # Only needed if not using default credential
@@ -162,7 +163,7 @@ AZURE_SEARCH_INDEX_NAME=your-index-name
 
 To run the entire pipeline (download, convert, and index):
 
-```
+```text
 ./main.py
 ```
 
@@ -170,7 +171,7 @@ To run the entire pipeline (download, convert, and index):
 
 You can run specific steps individually:
 
-```
+```text
 # Download only
 ./main.py --download-only
 
@@ -185,7 +186,7 @@ You can run specific steps individually:
 
 You can specify a different configuration file:
 
-```
+```text
 ./main.py --config /path/to/your/config.yaml
 ```
 
@@ -215,7 +216,7 @@ The Azure AI Search index includes the following fields:
 
 The project has the following structure:
 
-```
+```text
 apim-swagger-downloader/
 ├── main.py                      # Main runner script
 ├── requirements.txt             # Python dependencies
