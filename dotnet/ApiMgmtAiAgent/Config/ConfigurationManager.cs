@@ -19,6 +19,9 @@ namespace ApiMgmtAiAgent.Config
         public string AzureOpenAIEndpoint { get; }
         public string AzureOpenAIApiKey { get; }
         public string AzureOpenAIDeploymentName { get; }
+        public string AzureAISearchUri { get; }
+        public string AzureAISearchKey { get; }
+        public string AzureAISearchApiCollectionName { get; }
 
         public ConfigurationManager()
         {
@@ -36,6 +39,12 @@ namespace ApiMgmtAiAgent.Config
             AzureOpenAIEndpoint = Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? "your_azure_openai_endpoint";
             AzureOpenAIApiKey = Environment.GetEnvironmentVariable("AZURE_OPENAI_API_KEY") ?? "your_azure_openai_api_key";
             AzureOpenAIDeploymentName = Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME") ?? "your_azure_openai_deployment";
+
+            // Ai Search 
+            AzureAISearchUri = Environment.GetEnvironmentVariable("AZURE_SEARCH_ENDPOINT") ?? "";
+            AzureAISearchKey = Environment.GetEnvironmentVariable("AZURE_SEARCH_API_KEY") ?? "";
+            AzureAISearchApiCollectionName = Environment.GetEnvironmentVariable("AZURE_SEARCH_API_COLLECTION_NAME") ?? "";
+
         }
 
         /// <summary>

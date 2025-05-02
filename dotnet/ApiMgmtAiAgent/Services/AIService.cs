@@ -7,6 +7,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using Microsoft.SemanticKernel.Agents;
+using Azure;
 
 namespace ApiMgmtAiAgent.Services
 {
@@ -23,6 +24,8 @@ namespace ApiMgmtAiAgent.Services
         {
             _config = config;
             _kernel = InitializeSemanticKernel();
+            _kernel.Plugins.AddFromObject(new ApiSearchPlugin(_kernel,_config.AzureAISearchApiCollectionName), "ApiSearchPlugin");
+
             _agent = new()
             {
                 Name = "apim-ai-assistant",
@@ -63,7 +66,9 @@ namespace ApiMgmtAiAgent.Services
                     apiKey: _config.OpenAIApiKey
                 );
             }
-           
+
+            builder.Services.AddAzureAISearchVectorStore(new Uri(_config.AzureAISearchUri), new AzureKeyCredential(_config.AzureAISearchKey));
+
             return builder.Build();
         }
 
