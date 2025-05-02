@@ -38,9 +38,9 @@ public class ApiSearchPlugin
 
             await foreach (var record in searchResult)
             {
-                var chunk = record.Record.Chunk;
+                var content = record.Record.Content;
 
-                results.Add(chunk);
+                results.Add(content);
             }
 
             return results;
@@ -59,9 +59,19 @@ public class ApiSearchPlugin
         [VectorStoreRecordKey]
         public string Id { get; set; }
 
-        [JsonPropertyName("chunk")]
-        [VectorStoreRecordData(IsIndexed = true)]
-        public string Chunk { get; set; }
+        [JsonPropertyName("title")]
+        [VectorStoreRecordData]
+        public string Title { get; set; }
+
+        [JsonPropertyName("content")]
+        [VectorStoreRecordData]
+        public string Content { get; set; }
+
+        [JsonPropertyName("apiName")]
+        public string ApiName { get; set; }
+
+        [JsonPropertyName("apiVersion")]
+        public string ApiVersion { get; set; }
 
         [JsonPropertyName("vector")]
         [VectorStoreRecordVector(Dimensions: 1536)]
