@@ -22,6 +22,7 @@ namespace ApiMgmtAiAgent.Config
         public string AzureAISearchUri { get; }
         public string AzureAISearchKey { get; }
         public string AzureAISearchApiCollectionName { get; }
+        public string AzureAISearchDocCollectionName { get; }
 
         public ConfigurationManager()
         {
@@ -44,7 +45,7 @@ namespace ApiMgmtAiAgent.Config
             AzureAISearchUri = Environment.GetEnvironmentVariable("AZURE_SEARCH_ENDPOINT") ?? "";
             AzureAISearchKey = Environment.GetEnvironmentVariable("AZURE_SEARCH_API_KEY") ?? "";
             AzureAISearchApiCollectionName = Environment.GetEnvironmentVariable("AZURE_SEARCH_API_COLLECTION_NAME") ?? "";
-
+            AzureAISearchDocCollectionName = Environment.GetEnvironmentVariable("AZURE_SEARCH_DOC_COLLECTION_NAME") ?? "";
         }
 
         /// <summary>

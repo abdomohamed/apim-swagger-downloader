@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using ApiMgmtAiAgent.Config;
+using ApiMgmtAiAgent.Services.Plugins;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -24,7 +25,16 @@ namespace ApiMgmtAiAgent.Services
         {
             _config = config;
             _kernel = InitializeSemanticKernel();
+            
+            // Register API search plugin
             _kernel.Plugins.AddFromObject(new ApiSearchPlugin(_kernel,_config.AzureAISearchApiCollectionName), "ApiSearchPlugin");
+            
+            // Register documentation search plugin if collection name is provided
+            if (!string.IsNullOrEmpty(_config.AzureAISearchDocCollectionName))
+            {
+                _kernel.Plugins.AddFromObject(new DocSearchPlugin(_kernel, _config.AzureAISearchDocCollectionName), "DocSearchPlugin");
+                Console.WriteLine($"DocSearchPlugin registered with collection: {_config.AzureAISearchDocCollectionName}");
+            }
 
             _agent = new()
             {
@@ -73,9 +83,10 @@ namespace ApiMgmtAiAgent.Services
         }
 
         const string instructions = "You are an expert API assistant that helps users understand and work with APIs. " +
-                            "Provide accurate, concise answers based on the API documentation. " +
+                            "Provide accurate, concise answers based on the API documentation and related patterns documentation. " +
+                            "You can search both API specifications and implementation patterns documentation to provide comprehensive answers. " +
                             "If you don't have enough information to answer a question, say so clearly.\n\n" +
-                            "Based on the following API information, answer the user's question:\n\n";
+                            "Based on the following information, answer the user's question:\n\n";
 
         /// <summary>
         /// Gets the response from the AI model for a given prompt
