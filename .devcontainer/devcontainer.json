@@ -9,7 +9,7 @@
 			"version": "3.12",
 			"osVariant": "bullseye"
 		},
-		"ghcr.io/devcontainers/features/dotnet:1": {
+		"ghcr.io/devcontainers/features/dotnet:2": {
 			"version": "8"
 		},
 		"ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {}
