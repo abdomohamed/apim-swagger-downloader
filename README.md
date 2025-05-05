@@ -17,8 +17,9 @@ The `python` folder includes the following files and subdirectories:
 
 Is an AI Agent built on top Semantic Kernel library, it acts as an expert on answering questions about the ingested API(s) swagger definitions. 
 
-The `dotnet` folder includes the following subdirectory:
+The `dotnet` folder includes the following:
 
-1. **[ApiMgmtAiAgent](https://github.com/abdomohamed/apim-swagger-downloader/tree/main/dotnet/ApiMgmtAiAgent)**: This folder contains the .NET implementation for the project and may include various components related to API management.
+1. **[README.md](https://github.com/abdomohamed/apim-swagger-downloader/blob/main/dotnet/README.md)**: Documentation explaining what the ApiMgmtAiAgent project is and how to run it.
+2. **[ApiMgmtAiAgent](https://github.com/abdomohamed/apim-swagger-downloader/tree/main/dotnet/ApiMgmtAiAgent)**: This folder contains the .NET implementation for the project including the AI Agent for answering API-related questions.
 
 Feel free to explore the respective folders to understand the components better.
