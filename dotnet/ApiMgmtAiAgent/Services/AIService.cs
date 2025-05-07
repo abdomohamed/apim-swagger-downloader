@@ -56,7 +56,12 @@ namespace ApiMgmtAiAgent.Services
             Console.WriteLine("Initializing Semantic Kernel...");
             
             var builder = Kernel.CreateBuilder();
-            
+
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true;
+
+            var client = new HttpClient(handler);
+
             // Configure AI service - either Azure OpenAI or OpenAI
             if (_config.ShouldUseAzureOpenAI())
             {
@@ -65,7 +70,8 @@ namespace ApiMgmtAiAgent.Services
                     deploymentName: _config.AzureOpenAIDeploymentName,
                     endpoint: _config.AzureOpenAIEndpoint,
                     apiKey: _config.AzureOpenAIApiKey,
-                    serviceId: "AzureOpenAIChatCompletion"
+                    serviceId: "AzureOpenAIChatCompletion",
+                    httpClient: client
                 );
             }
             else
