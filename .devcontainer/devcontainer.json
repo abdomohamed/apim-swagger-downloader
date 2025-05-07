@@ -1,18 +1,18 @@
 {
 	"image": "mcr.microsoft.com/devcontainers/universal:2",
 	"features": {
-		"ghcr.io/devcontainers/features/common-utils:2": {
-			"installZsh": true,
-			"zshConfiguration": "oh-my-zsh"
-		},
-		"ghcr.io/devcontainers/features/python:1": {
-			"version": "3.12",
-			"osVariant": "bullseye"
-		},
-		"ghcr.io/devcontainers/features/dotnet:1": {
-			"version": "8"
-		},
-		"ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {}
+		// "ghcr.io/devcontainers/features/common-utils:2": {
+		// 	"installZsh": true,
+		// 	"zshConfiguration": "oh-my-zsh"
+		// },
+		// "ghcr.io/devcontainers/features/python:1": {
+		// 	"version": "3.12",
+		// 	"osVariant": "bullseye"
+		// },
+		// "ghcr.io/devcontainers/features/dotnet:1": {
+		// 	"version": "8"
+		// },
+		// "ghcr.io/jlaundry/devcontainer-features/azure-functions-core-tools:1": {}
 	},
 	"customizations": {
 		"vscode": {
@@ -23,5 +23,6 @@
 			]
 		}
 	},
-	"postCreateCommand": "sudo chmod a+rwx /usr/share/dotnet" // avoids needing to run as 'sudo' when starting KernelHttpServer
+	// "postCreateCommand": "sudo chmod a+rwx /usr/share/dotnet" // avoids needing to run as 'sudo' when starting KernelHttpServer
+	"postCreateCommand": "bash .devcontainer/post_create.sh"
 }
