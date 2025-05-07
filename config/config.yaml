@@ -42,3 +42,11 @@ processing:
 wiki:
   wiki_dir: "wiki_documents"  # Directory containing wiki markdown files
   wiki_base_url: "https://example.com/wiki"  # Base URL for constructing document URLs
+
+openai:
+  api_key: 
+  endpoint: 
+  api_version:
+  model: 
+  embedding_model_name: 
+  embeedding_model_deployment_name: 
