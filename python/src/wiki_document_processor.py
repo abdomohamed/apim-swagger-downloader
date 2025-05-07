@@ -7,7 +7,6 @@ from datetime import datetime
 from pathlib import Path
 from azure.identity import DefaultAzureCredential, ClientSecretCredential
 from azure.search.documents import SearchClient
-from azure.search.documents.models import IndexDocumentsBatch
 from src.config import Config
 
 # Set up logging

@@ -1,4 +1,5 @@
 import os
+import sys
 import yaml
 from dotenv import load_dotenv
 
@@ -127,3 +128,17 @@ class Config:
                 'wiki_base_url': ''
             }
         return self.config['wiki']
+
+# Add this method to the Config class in config.py
+    def get_openai_settings(self):
+        """Get OpenAI API settings"""
+        if 'openai' not in self.config:
+            print(f"OpenAI settings not found in config. Using default settings. {self.config}", file=sys.stderr)
+            # Default OpenAI settings if not specified
+            return {
+                'api_key': os.getenv('AZURE_OPENAI_API_KEY', ''),
+                'endpoint': os.getenv('AZURE_OPENAI_ENDPOINT', ''),
+                'api_version': os.getenv('AZURE_OPENAI_API_VERSION', '2023-05-15'),
+                'model': os.getenv('AZURE_OPENAI_MODEL', 'gpt-4')
+            }
+        return self.config['openai']
