@@ -1,0 +1,44 @@
+# Azure API Management Configuration
+azure:
+  # Authentication settings
+  auth:
+    use_default_credential: true  # Set to true to use Azure CLI login, false to use service principal
+  
+  # Azure credentials (only needed if use_default_credential is false)
+  tenant_id: 
+  client_id: 
+  client_secret: 
+  
+  # APIM details
+  subscription_id: 
+  resource_group: 
+  service_name: 
+  
+  # API filter settings - if empty, all APIs will be processed
+  api_filter:
+    include_apis: ['echo-api']  # List of API IDs to include, e.g. ["api1", "api2"]
+    include_tags: []  # List of tags to filter APIs by, e.g. ["public", "v1"]
+  
+
+  # Azure AI Search settings
+  search:
+    endpoint: 
+    key: 
+    index_name: 
+
+# Output settings
+output:
+  swagger_dir: "output/swagger"
+  markdown_dir: "output/markdown"
+
+# Processing settings
+processing:
+  # Set to true to convert swagger to markdown
+  convert_to_markdown: true
+  # Set to true to upload markdown to Azure AI Search
+  upload_to_search: true
+
+# Wiki settings
+wiki:
+  wiki_dir: "wiki_documents"  # Directory containing wiki markdown files
+  wiki_base_url: "https://example.com/wiki"  # Base URL for constructing document URLs
