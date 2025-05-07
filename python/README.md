@@ -198,6 +198,29 @@ The tool produces the following outputs:
 2. **Markdown Documentation**: Human-readable API docs in `output/markdown/`
 3. **Search Index**: API documentation indexed in Azure AI Search for full-text search
 
+### Wiki Document Processing
+
+The tool can also ingest wiki documents from a directory structure into Azure AI Search. It will:
+
+1. **Identify design and build documents** for each service based on file paths and names
+2. **Combine related documents** for each service into a single searchable document
+3. **Extract service names** from file paths or content
+4. **Generate document URLs** based on the original folder structure
+5. **Index the combined documents** in Azure AI Search
+
+Configure wiki document processing in the config file:
+
+```yaml
+wiki:
+  wiki_dir: "wiki_documents"  # Directory containing wiki markdown files
+  wiki_base_url: "https://example.com/wiki"  # Base URL for constructing document URLs
+```
+
+Process only wiki documents with:
+```bash
+main.py --wiki-only
+```
+
 ## Search Schema
 
 The Azure AI Search index includes the following fields:

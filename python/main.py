@@ -7,6 +7,7 @@ from src.config import Config
 from src.apim_swagger_downloader import APIMSwaggerDownloader
 from src.swagger_to_markdown import SwaggerToMarkdownConverter
 from src.azure_search_indexer import AzureSearchIndexer
+from src.wiki_document_processor import WikiDocumentProcessor
 
 # Set up logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -20,7 +21,8 @@ def parse_arguments():
     parser.add_argument('--download-only', action='store_true', help='Only download swagger files, don\'t convert')
     parser.add_argument('--convert-only', action='store_true', help='Only convert swagger to markdown, don\'t download')
     parser.add_argument('--index-only', action='store_true', help='Only index markdown files to Azure Search')
-    
+    parser.add_argument('--wiki-only', action='store_true', help='Only process wiki documents, don\'t download or convert swagger')
+
     return parser.parse_args()
 
 def main():
@@ -74,7 +76,21 @@ def main():
             logger.error(f"Error converting swagger to markdown: {str(e)}")
             if not args.convert_only:  # Only exit if this isn't a convert-only run
                 return 1
-    
+
+    # Step 2.5: Process wiki documents
+    if (not args.download_only and not args.convert_only and not args.index_only and
+        processing_settings.get('process_wiki', True)) or args.wiki_only:
+        try:
+            logger.info("=== STEP 2.5: Processing Wiki Documents ===")
+            wiki_processor = WikiDocumentProcessor(config)
+            wiki_processed = wiki_processor.process_wiki_documents()
+            
+            logger.info(f"Processed {wiki_processed} wiki documents")
+        except Exception as e:
+            logger.error(f"Error processing wiki documents: {str(e)}")
+            if args.wiki_only:  # Only exit if this is a wiki-only run
+                return 1
+            
     # Step 3: Index markdown in Azure AI Search
     if (not args.download_only and not args.convert_only and processing_settings.get('upload_to_search', True)) or args.index_only:
         try:

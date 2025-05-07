@@ -117,3 +117,13 @@ class Config:
     def get_processing_settings(self):
         """Get processing settings"""
         return self.config['processing']
+    
+    # Add this method to the Config class
+    def get_wiki_settings(self):
+        """Get wiki-related settings"""
+        if 'wiki' not in self.config:
+            self.config['wiki'] = {
+                'wiki_dir': 'wiki_documents',
+                'wiki_base_url': ''
+            }
+        return self.config['wiki']
