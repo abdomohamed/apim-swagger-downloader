@@ -1,12 +1,13 @@
+using Azure.Search.Documents;
+using Azure.Search.Documents.Indexes;
+using Azure.Search.Documents.Models;
+using Microsoft.Extensions.VectorData;
+using Microsoft.SemanticKernel;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Azure.Search.Documents;
-using Azure.Search.Documents.Indexes;
-using Microsoft.Extensions.VectorData;
-using Microsoft.SemanticKernel;
 
 namespace ApiMgmtAiAgent.Services.Plugins
 {
@@ -27,28 +28,40 @@ namespace ApiMgmtAiAgent.Services.Plugins
         }
 
         [KernelFunction("Search")]
-        [Description("Search for documentation in the API Management patterns and integrations")]
+        [Description("Search for documentation in the API wiki information")]
         public async Task<IEnumerable<string>> SearchAsync(string query)
         {
             try
             {
-                var vectorStore = _kernel.GetRequiredService<IVectorStore>();
+                var options = new SearchOptions()
+                {
+                    IncludeTotalCount = true,
+                    Filter = ""
+                };
 
-                var collection = vectorStore.GetCollection<string, IndexSchema>(_collectionName);
+                options = new SearchOptions()
+                {
+                    QueryType = Azure.Search.Documents.Models.SearchQueryType.Semantic,
+                    SemanticSearch = new()
+                    {
+                        SemanticConfigurationName = "my-semantic-config",
+                        QueryCaption = new(QueryCaptionType.Extractive)
+                    }
+                };
 
-                //var vectorSearchOptions = new VectorSearchOptions<IndexSchema>
-                //{
-                //    VectorProperty = r => r.Vector,
-                //};
+                options.Select.Add("apiContent");
+                options.Select.Add("reference");
+                options.Select.Add("id");
 
-                // Perform search request
-                var searchResult = collection.SearchAsync(query, top: 5);
+
+                var searchResult = await _searchClient.SearchAsync<IndexSchema>(options);
 
                 var results = new List<string>();
 
-                await foreach (var record in searchResult)
+                await foreach (var record in searchResult.Value.GetResultsAsync())
                 {
-                    var content = record.Record.Content;
+                    var content = $"Content:{record.Document.ApiContent}, Reference: {record.Document.Reference}";
+
                     results.Add(content);
                 }
 
@@ -64,27 +77,22 @@ namespace ApiMgmtAiAgent.Services.Plugins
 
         public class IndexSchema
         {
+
             [JsonPropertyName("id")]
             [VectorStoreRecordKey]
             public string Id { get; set; }
 
-            [JsonPropertyName("title")]
+            [JsonPropertyName("apiContent")]
             [VectorStoreRecordData]
-            public string Title { get; set; }
+            public string ApiContent { get; set; }
 
-            [JsonPropertyName("content")]
-            [VectorStoreRecordData]
-            public string Content { get; set; }
-
-            [JsonPropertyName("documentType")]
-            public string DocumentType { get; set; }
-
-            [JsonPropertyName("lastUpdated")]
-            public string LastUpdated { get; set; }
-
-            [JsonPropertyName("vector")]
+            [JsonPropertyName("apiContentVector")]
             [VectorStoreRecordVector(Dimensions: 1536)]
-            public ReadOnlyMemory<float> Vector { get; set; }
+            public ReadOnlyMemory<float> ApiContentVector { get; set; }
+
+            [JsonPropertyName("reference")]
+            public string Reference { get; set; }
+
         }
     }
 }
