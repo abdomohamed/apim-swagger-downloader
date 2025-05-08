@@ -1,14 +1,16 @@
-using System;
-using System.Threading.Tasks;
 using ApiMgmtAiAgent.Config;
 using ApiMgmtAiAgent.Services.Plugins;
+using Azure;
+using Azure.Search.Documents;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
-using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using Microsoft.SemanticKernel.Agents;
-using Azure;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+using System;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace ApiMgmtAiAgent.Services
 {
@@ -25,14 +27,16 @@ namespace ApiMgmtAiAgent.Services
         {
             _config = config;
             _kernel = InitializeSemanticKernel();
-            
+
             // Register API search plugin
-            _kernel.Plugins.AddFromObject(new ApiSearchPlugin(_kernel,_config.AzureAISearchApiCollectionName), "ApiSearchPlugin");
+            SearchClient searchClient = new SearchClient(new Uri(_config.AzureAISearchUri), _config.AzureAISearchApiCollectionName, new AzureKeyCredential(_config.AzureAISearchKey));
+            _kernel.Plugins.AddFromObject(new ApiSearchPlugin(_kernel,_config.AzureAISearchApiCollectionName, searchClient), "ApiSearchPlugin");
             
             // Register documentation search plugin if collection name is provided
             if (!string.IsNullOrEmpty(_config.AzureAISearchDocCollectionName))
             {
-                _kernel.Plugins.AddFromObject(new DocSearchPlugin(_kernel, _config.AzureAISearchDocCollectionName), "DocSearchPlugin");
+                _kernel.Plugins.AddFromObject(new DocSearchPlugin(_kernel, _config.AzureAISearchDocCollectionName, searchClient),
+                    "DocSearchPlugin");
                 Console.WriteLine($"DocSearchPlugin registered with collection: {_config.AzureAISearchDocCollectionName}");
             }
 
@@ -57,14 +61,16 @@ namespace ApiMgmtAiAgent.Services
             
             var builder = Kernel.CreateBuilder();
 
-            var handler = new HttpClientHandler();
-            handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true;
-
-            var client = new HttpClient(handler);
+           
 
             // Configure AI service - either Azure OpenAI or OpenAI
             if (_config.ShouldUseAzureOpenAI())
             {
+                var handler = new HttpClientHandler();
+                handler.ServerCertificateCustomValidationCallback = (httpRequestMessage, cert, cetChain, policyErrors) => true;
+
+                var client = new HttpClient(handler);
+
                 // Use Azure OpenAI
                 builder.AddAzureOpenAIChatCompletion(
                     deploymentName: _config.AzureOpenAIDeploymentName,
@@ -78,7 +84,7 @@ namespace ApiMgmtAiAgent.Services
             {
                 // Use OpenAI
                 builder.AddOpenAIChatCompletion(
-                    modelId: "gpt-4",
+                    modelId: "gpt-4o",
                     apiKey: _config.OpenAIApiKey
                 );
             }

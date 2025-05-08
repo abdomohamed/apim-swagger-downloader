@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Azure.Search.Documents;
 using Azure.Search.Documents.Indexes;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel;
@@ -16,11 +17,13 @@ namespace ApiMgmtAiAgent.Services.Plugins
     {
         private readonly Kernel _kernel;
         private readonly string _collectionName;
+        private readonly SearchClient _searchClient;
 
-        public DocSearchPlugin(Kernel kernel, string collectionName)
+        public DocSearchPlugin(Kernel kernel, string collectionName, SearchClient searchClient)
         {
             _kernel = kernel;
             _collectionName = collectionName;
+            _searchClient = searchClient;
         }
 
         [KernelFunction("Search")]
@@ -33,13 +36,13 @@ namespace ApiMgmtAiAgent.Services.Plugins
 
                 var collection = vectorStore.GetCollection<string, IndexSchema>(_collectionName);
 
-                var vectorSearchOptions = new VectorSearchOptions<IndexSchema>
-                {
-                    VectorProperty = r => r.Vector,
-                };
+                //var vectorSearchOptions = new VectorSearchOptions<IndexSchema>
+                //{
+                //    VectorProperty = r => r.Vector,
+                //};
 
                 // Perform search request
-                var searchResult = collection.SearchAsync(query, top: 5, vectorSearchOptions);
+                var searchResult = collection.SearchAsync(query, top: 5);
 
                 var results = new List<string>();
 

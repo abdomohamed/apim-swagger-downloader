@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.2.1" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- <TargetFramework>net9.0</TargetFramework> -->
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>022d66e3-7f98-44f1-b68c-2ff3744002bc</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.2.1" />
+    <PackageReference Include="Aspire.Hosting.Azure.CognitiveServices" Version="9.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ApiMgmtAiAgent\ApiMgmtAiAgent.csproj" />
+  </ItemGroup>
+
+</Project>
