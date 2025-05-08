@@ -419,8 +419,7 @@ class AzureSearchIndexerV2:
         return {
             "id": file_id,
             "apiName": api_info.get("apiName", ""),
-            "apiContent": json_content,
-            "apiContentVector": json_content,
+            "apiContent": str(api_info),
             "lastUpdated": datetime.now().isoformat() + 'Z',
             "reference": swagger_file_path,
         }
