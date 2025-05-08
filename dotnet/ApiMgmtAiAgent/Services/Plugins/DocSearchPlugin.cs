@@ -54,7 +54,7 @@ namespace ApiMgmtAiAgent.Services.Plugins
                 options.Select.Add("id");
 
 
-                var searchResult = await _searchClient.SearchAsync<IndexSchema>(options);
+                var searchResult = await _searchClient.SearchAsync<IndexSchema>(query, options);
 
                 var results = new List<string>();
 
